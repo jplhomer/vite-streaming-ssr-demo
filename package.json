@@ -1,0 +1,23 @@
+{
+  "name": "worker-streaming-demo",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "yarn build:client && yarn build:worker",
+    "build:client": "vite build --outDir dist/client",
+    "build:worker": "WORKER=true vite build --outDir dist/worker --ssr worker.js",
+    "serve": "vite preview",
+    "workers": "miniflare dist/worker/worker.js -s dist/client"
+  },
+  "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.1.3",
+    "react": "^18.0.0-alpha-cb11155c8-20211112",
+    "react-dom": "^18.0.0-alpha-cb11155c8-20211112",
+    "react-error-boundary": "^3.1.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^1.0.0",
+    "miniflare": "^1.4.1",
+    "vite": "^2.6.4"
+  }
+}
