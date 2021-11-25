@@ -3,8 +3,7 @@ import { DataProvider } from "./data";
 import { ABORT_DELAY, API_DELAY } from "./delays";
 import {
   renderToPipeableStream,
-  renderToReadableStream,
-} from "react-dom/server";
+} from "react-dom/cjs/react-dom-server.node.development";
 
 /**
  * Streaming SSR in a Node.js runtime
@@ -46,19 +45,57 @@ export function renderInNode({ res, head }) {
 export function renderInWorkers({ head }) {
   const data = createServerData();
 
-  let didError = false;
+  const proxy = {
+    write(chunk) {
+      this.controller.enqueue(chunk);
+      // no backpressure support yet...
+      return true;
+    },
+    end() {
+      this.controller.close();
+    },
+    destroy(err) {
+      this.controller.error(err);
+    },
+    on() {}
+  };
 
-  const stream = renderToReadableStream(
-    <DataProvider data={data}>
-      <App head={head} />
-    </DataProvider>,
-    {
-      onError(x) {
-        didError = true;
-        console.error(x);
-      },
+  let didError = false;
+  try {
+    const {pipe, abort} = renderToPipeableStream(
+        <DataProvider data={data}>
+          <App head={head} />
+        </DataProvider>,
+        {
+          onCompleteShell() {
+            pipe(proxy);
+          },
+          onError(x) {
+            didError = true;
+            console.error(x);
+          },
+        }
+    );
+    proxy.abort = (reason) => {
+      console.error("Proxy aborted:", reason);
+      abort();
     }
-  );
+  } catch(e) {
+    console.error("renderToPipeableStream failed:", e);
+  }
+
+  if (didError) {
+    throw new Error("renderToPipeableStream failed right after start");
+  }
+
+  const stream = new ReadableStream({
+    start: function (controller) {
+      proxy.controller = controller;
+    },
+    cancel: function(reason) {
+      proxy.abort(reason);
+    }
+  });
 
   return new Response(stream, {
     headers: {

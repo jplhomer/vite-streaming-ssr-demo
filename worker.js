@@ -34,7 +34,7 @@ addEventListener("fetch", (event) => {
   try {
     event.respondWith(renderInWorkers({ head }));
   } catch (error) {
-    return new Response(event.message, {
+    return new Response(error.message, {
       status: 500,
     });
   }
