@@ -16,7 +16,7 @@ export const ABORT_DELAY = 10000;
 
 // DIRTY DIRTY way to polyfill some missing globals in miniflare
 // There is a better way: https://miniflare.dev/api.html#arbitrary-bindings
-globalThis.setImmediate = globalThis.setImmediate || ((fn) => setTimeout(fn, 0));
+globalThis.setImmediate ||= fn => setTimeout(fn, 0);
 // We have this in Oxygen and can expose it
 globalThis.Buffer = globalThis.Buffer || {
     td: new TextEncoder(),
