@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^1.0.0",
-    "miniflare": "^1.4.1",
+    "miniflare": "^2.0.0-rc.2",
     "vite": "^2.6.4"
   }
 }
