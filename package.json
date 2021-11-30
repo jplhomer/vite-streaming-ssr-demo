@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "vite",
     "build": "yarn build:client && yarn build:worker",
+    "build-dev": "yarn build:client && yarn build:worker-dev",
     "build:client": "vite build --outDir dist/client",
     "build:worker": "WORKER=true vite build --outDir dist/worker --ssr worker.js",
     "build:worker-dev": "WORKER=true vite build --mode development --outDir dist/worker --ssr worker.js",
