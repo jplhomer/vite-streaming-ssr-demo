@@ -22,6 +22,7 @@ export function renderInNode({ res, head }) {
       <App head={head} />
     </DataProvider>,
     {
+      bootstrapModules: ["src/main.jsx"],
       onCompleteShell() {
         // If something errored before we started streaming, we set the error code appropriately.
         res.statusCode = didError ? 500 : 200;

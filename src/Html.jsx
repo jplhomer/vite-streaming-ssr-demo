@@ -9,13 +9,6 @@ export default function Html({ children, head }) {
           }}
         />
         {children}
-        {/*
-         * TODO: Fix Vite upstream to allow this tag to be injected via `bootstrapModules` in `pipeToWritableStream` instead.
-         * Currently, it breaks the JSX Runtime.
-         */}
-        {import.meta.env.DEV && (
-          <script type="module" src="/src/main.jsx"></script>
-        )}
       </body>
     </html>
   );
