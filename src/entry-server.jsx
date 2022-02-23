@@ -15,7 +15,6 @@ export function renderInNode({ res, head }) {
   res.socket.on("error", (error) => {
     console.error("Fatal", error);
   });
-  let didError = false;
 
   const { pipe, abort } = renderToPipeableStream(
     <DataProvider data={data}>
@@ -23,14 +22,15 @@ export function renderInNode({ res, head }) {
     </DataProvider>,
     {
       onCompleteShell() {
-        // If something errored before we started streaming, we set the error code appropriately.
-        res.statusCode = didError ? 500 : 200;
+        res.statusCode = 200;
         res.setHeader("Content-type", "text/html");
         pipe(res);
       },
-      onError(x) {
-        didError = true;
-        console.error(x);
+      onErrorShell(x) {
+        res.statusCode = 500;
+        res.send(
+          `<!doctype html><p>An error ocurred:</p><pre>${error.message}</pre>`
+        );
       },
     }
   );
@@ -43,28 +43,30 @@ export function renderInNode({ res, head }) {
 /**
  * Stream a response in a Workers/v8 runtime
  */
-export function renderInWorkers({ head }) {
+export async function renderInWorkers({ head }) {
   const data = createServerData();
 
-  let didError = false;
+  try {
+    const stream = await renderToReadableStream(
+      <DataProvider data={data}>
+        <App head={head} />
+      </DataProvider>
+    );
 
-  const stream = renderToReadableStream(
-    <DataProvider data={data}>
-      <App head={head} />
-    </DataProvider>,
-    {
-      onError(x) {
-        didError = true;
-        console.error(x);
+    return new Response(stream, {
+      headers: {
+        "content-type": "text/html",
       },
-    }
-  );
-
-  return new Response(stream, {
-    headers: {
-      "content-type": "text/html",
-    },
-  });
+    });
+  } catch (error) {
+    return new Response(
+      `<!doctype html><p>An error ocurred:</p><pre>${error.message}</pre>`,
+      {
+        status: 500,
+        headers: { "Content-Type": "text/html" },
+      }
+    );
+  }
 }
 
 // Simulate a delay caused by data fetching.
