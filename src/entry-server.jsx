@@ -21,6 +21,7 @@ export function renderInNode({ res, head }) {
       <App head={head} />
     </DataProvider>,
     {
+      bootstrapModules: ["src/main.jsx"],
       onCompleteShell() {
         res.statusCode = 200;
         res.setHeader("Content-type", "text/html");
