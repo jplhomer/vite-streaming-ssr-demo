@@ -21,7 +21,7 @@ export function renderInNode({ res, head }) {
       <App head={head} />
     </DataProvider>,
     {
-      onCompleteShell() {
+      onShellReady() {
         res.statusCode = 200;
         res.setHeader("Content-type", "text/html");
         pipe(res);
